@@ -4,14 +4,15 @@
 `.dm` и `.dmU`.
 
 Программа сопоставляет значения из файла с описанием выбранного формата и
-показывает результат в удобном текстовом виде. Работа выполняется локально:
-интернет, сервер и установка DataMobile не требуются.
+показывает результат в удобном текстовом виде. Работа выполняется локально: 
+доступ к сети не требуется.
 
 ## Готовые версии
 
 | Платформа | Файл | Назначение |
 | --- | --- | --- |
-| Windows x64 | [DataMobileExchangeParser_Portable_Windows_x64.zip](releases/DataMobileExchangeParser_Portable_Windows_x64.zip) | Portable-версия без установки |
+| Windows x64 | [DataMobileExchangeParser_Portable_Windows_x64.zip]([releases/DataMobileExchangeParser_Portable_Windows_x64.zip](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParserSetup.exe)) | Portable-версия без установки |
+| Windows Portable | [DataMobileExchangeParser_Portable_Windows_x64.zip](releases/DataMobileExchangeParser_Portable_Windows_x64.zip) | Portable-версия без установки |
 | macOS | [DataMobileExchangeParser_macOS.dmg](releases/DataMobileExchangeParser_macOS.dmg) | Установка через DMG |
 | macOS | [DataMobileExchangeParser_Portable_macOS.zip](releases/DataMobileExchangeParser_Portable_macOS.zip) | Portable-приложение в ZIP |
 | Исходники | [DataMobileExchangeParser_Source.zip](releases/DataMobileExchangeParser_Source.zip) | Чистый архив проекта |
