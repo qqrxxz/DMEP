@@ -1,23 +1,23 @@
 # DataMobile Exchange Parser
 
 Настольное приложение для расшифровки файлов обмена DataMobile в форматах
-`.dm` и `.dmU`.
+`.dm`, `.dmU` и `.dmu`.
 
 Программа сопоставляет значения из файла с описанием выбранного формата и
-показывает результат в удобном текстовом виде. Работа выполняется локально: 
+показывает результат в удобном текстовом виде. Работа выполняется локально:
 доступ к сети не требуется.
 
 ## Готовые версии
 
-| Платформа | Файл | Загрузка |
+| Платформа | Вариант | Загрузка |
 | --- | --- | --- |
-| Windows x64 | [DataMobileExchangeParserSetup.exe](releases/DataMobileExchangeParserSetup.exe) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParserSetup.exe) |
-| Windows Portable | [DataMobileExchangeParser_Portable_Windows_x64.zip](releases/DataMobileExchangeParser_Portable_Windows_x64.zip) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Portable_Windows_x64.zip) |
-| macOS | [DataMobileExchangeParser_macOS.dmg](releases/DataMobileExchangeParser_macOS.dmg) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_macOS.dmg) |
-| macOS Portable| [DataMobileExchangeParser_Portable_macOS.zip](releases/DataMobileExchangeParser_Portable_macOS.zip) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Portable_macOS.zip) |
-| Source | [DataMobileExchangeParser_Source.zip](releases/DataMobileExchangeParser_Source.zip) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Source.zip) |
+| Windows x64 | Установщик | [DataMobileExchangeParserSetup.exe](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParserSetup.exe) |
+| Windows x64 | Portable ZIP | [DataMobileExchangeParser_Portable_Windows_x64.zip](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Portable_Windows_x64.zip) |
+| macOS | DMG | [DataMobileExchangeParser_macOS.dmg](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_macOS.dmg) |
+| macOS | Portable ZIP | [DataMobileExchangeParser_Portable_macOS.zip](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Portable_macOS.zip) |
+| Исходники | ZIP | [DataMobileExchangeParser_Source.zip](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Source.zip) |
 
-Сборки macOS универсальные и подходят для Apple Silicon и Intel. 
+Сборки macOS универсальные и подходят для Apple Silicon и Intel.
 Windows-версия предназначена для 64-битной Windows.
 
 ## Возможности
