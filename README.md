@@ -9,16 +9,16 @@
 
 ## Готовые версии
 
-| Платформа | Файл | Назначение |
+| Платформа | Файл | Загрузка |
 | --- | --- | --- |
-| Windows x64 | [DataMobileExchangeParser_Portable_Windows_x64.zip]([releases/DataMobileExchangeParser_Portable_Windows_x64.zip](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParserSetup.exe)) | Portable-версия без установки |
-| Windows Portable | [DataMobileExchangeParser_Portable_Windows_x64.zip](releases/DataMobileExchangeParser_Portable_Windows_x64.zip) | Portable-версия без установки |
-| macOS | [DataMobileExchangeParser_macOS.dmg](releases/DataMobileExchangeParser_macOS.dmg) | Установка через DMG |
-| macOS | [DataMobileExchangeParser_Portable_macOS.zip](releases/DataMobileExchangeParser_Portable_macOS.zip) | Portable-приложение в ZIP |
-| Исходники | [DataMobileExchangeParser_Source.zip](releases/DataMobileExchangeParser_Source.zip) | Чистый архив проекта |
+| Windows x64 | [DataMobileExchangeParserSetup.exe](releases/DataMobileExchangeParserSetup.exe) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParserSetup.exe) |
+| Windows Portable | [DataMobileExchangeParser_Portable_Windows_x64.zip](releases/DataMobileExchangeParser_Portable_Windows_x64.zip) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Portable_Windows_x64.zip) |
+| macOS | [DataMobileExchangeParser_macOS.dmg](releases/DataMobileExchangeParser_macOS.dmg) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_macOS.dmg) |
+| macOS Portable| [DataMobileExchangeParser_Portable_macOS.zip](releases/DataMobileExchangeParser_Portable_macOS.zip) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Portable_macOS.zip) |
+| Source | [DataMobileExchangeParser_Source.zip](releases/DataMobileExchangeParser_Source.zip) | [Загрузить](https://github.com/qqrxxz/DMEP/releases/download/v1.0.0/DataMobileExchangeParser_Source.zip) |
 
-Сборки macOS универсальные и подходят для Apple Silicon и Intel. Windows-
-версия предназначена для 64-битной Windows.
+Сборки macOS универсальные и подходят для Apple Silicon и Intel. 
+Windows-версия предназначена для 64-битной Windows.
 
 ## Возможности
 
