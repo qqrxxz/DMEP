@@ -1,0 +1,84 @@
+name: Сборка Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+    paths:
+      - "**.py"
+      - "config/**"
+      - "specs/**"
+      - "assets/**"
+      - "requirements.txt"
+      - "build_windows.bat"
+      - "build_installer_windows.bat"
+      - "build_portable_windows.bat"
+      - "installer/**"
+      - ".github/workflows/build-windows.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      APP_NAME: DataMobile Exchange Parser
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+
+      - name: Установка Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup --no-progress -y }
+          if (-not (Test-Path $iscc)) { throw "Inno Setup не установлен" }
+
+      # The .bat scripts end with "pause": stdin from NUL keeps them non-interactive.
+      - name: Сборка приложения
+        shell: cmd
+        run: |
+          python -m venv .venv
+          call build_windows.bat < NUL
+
+      - name: Тесты
+        shell: cmd
+        run: |
+          .venv\Scripts\python.exe -m pip install --no-compile "pytest>=8.0,<9.0"
+          set QT_QPA_PLATFORM=offscreen
+          .venv\Scripts\python.exe -m pytest -q tests
+
+      - name: Проверка сборки
+        shell: pwsh
+        run: |
+          $exe = "dist\$env:APP_NAME\$env:APP_NAME.exe"
+          Get-ChildItem "dist\$env:APP_NAME\_internal\assets"
+          # The app must start and keep running without crashing.
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $process = Start-Process -FilePath $exe -PassThru
+          Start-Sleep -Seconds 15
+          if ($process.HasExited) { throw "Приложение завершилось с кодом $($process.ExitCode)" }
+          Stop-Process -Id $process.Id
+
+      - name: Установщик и portable ZIP
+        shell: cmd
+        run: |
+          call build_installer_windows.bat < NUL
+          if errorlevel 1 exit /b 1
+          call build_portable_windows.bat < NUL
+          if errorlevel 1 exit /b 1
+          dir releases
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DataMobileExchangeParser_Windows_x64
+          path: |
+            releases/DataMobileExchangeParserSetup.exe
+            releases/DataMobileExchangeParser_Portable_Windows.zip
+          retention-days: 14
+          if-no-files-found: error
