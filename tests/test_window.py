@@ -8,7 +8,8 @@ from pathlib import Path
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 try:
-    from PySide6.QtCore import QCoreApplication, QSettings
+    from PySide6.QtCore import QCoreApplication, QMimeData, QPoint, QSettings, Qt, QUrl
+    from PySide6.QtGui import QDragEnterEvent, QDropEvent
     from PySide6.QtWidgets import QApplication
 except ImportError:  # pragma: no cover - GUI tests need PySide6
     QApplication = None
@@ -74,6 +75,33 @@ class MainWindowTests(unittest.TestCase):
 
         self.assertIn("Не удалось расшифровать файл", self.output_text())
         self.assertFalse(self.window._copy_button.isEnabled())
+
+    def mime_for(self, path: Path) -> QMimeData:
+        mime = QMimeData()
+        mime.setUrls([QUrl.fromLocalFile(str(path))])
+        return mime
+
+    def test_dropped_file_is_decoded(self) -> None:
+        path = self.write_file("1\n+\n1;+;Основной склад", name="example.dmU")
+        mime = self.mime_for(path)
+        args = (QPoint(10, 10), Qt.CopyAction, mime, Qt.LeftButton, Qt.NoModifier)
+
+        enter = QDragEnterEvent(*args)
+        self.window.dragEnterEvent(enter)
+        self.assertTrue(enter.isAccepted())
+
+        drop = QDropEvent(*args)
+        self.window.dropEvent(drop)
+        self.assertIn("Основной склад", self.output_text())
+        self.assertEqual(str(path), self.window._file_field.text())
+
+    def test_drop_of_unsupported_file_is_rejected(self) -> None:
+        mime = self.mime_for(self.write_file("x", name="example.txt"))
+        enter = QDragEnterEvent(
+            QPoint(10, 10), Qt.CopyAction, mime, Qt.LeftButton, Qt.NoModifier
+        )
+        self.window.dragEnterEvent(enter)
+        self.assertFalse(enter.isAccepted())
 
 
 if __name__ == "__main__":

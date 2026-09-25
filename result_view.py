@@ -25,11 +25,12 @@ def _plural(count: int, one: str, few: str, many: str) -> str:
 
 
 def _message(theme: Theme, title: str, text: str, color: str | None = None) -> str:
+    body = escape(text).replace("\n", "<br>")
     return (
         f'<div style="margin-top: 48px;" align="center">'
         f'<p style="font-size: large; font-weight: 600; color: {color or theme.text};">'
         f"{escape(title)}</p>"
-        f'<p style="color: {theme.muted};">{escape(text)}</p>'
+        f'<p style="color: {theme.muted};">{body}</p>'
         f"</div>"
     )
 
@@ -38,7 +39,8 @@ def render_placeholder(theme: Theme) -> str:
     return _message(
         theme,
         "Файл пока не выбран",
-        "Выберите формат обмена и файл .dm / .dmU — расшифровка начнётся автоматически.",
+        "Выберите формат обмена и перетащите файл .dm / .dmU в это окно\n"
+        "или нажмите «Выбрать файл…». Расшифровка начнётся автоматически.",
     )
 
 

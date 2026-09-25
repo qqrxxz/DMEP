@@ -127,6 +127,10 @@ def stylesheet(t: Theme) -> str:
         border: 1px solid {t.border};
         border-radius: 12px;
     }}
+    QFrame#card[dropTarget="true"] {{
+        background: {t.accent_soft};
+        border: 2px dashed {t.accent};
+    }}
     QComboBox, QLineEdit {{
         background: {t.surface};
         color: {t.text};

@@ -3,7 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 
 from PySide6.QtCore import QSettings, Qt, QTimer
-from PySide6.QtGui import QGuiApplication, QKeySequence, QShortcut, QTextDocument
+from PySide6.QtGui import (
+    QDragEnterEvent,
+    QDragLeaveEvent,
+    QDropEvent,
+    QGuiApplication,
+    QKeySequence,
+    QShortcut,
+    QTextDocument,
+)
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -20,7 +28,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from exchange_parser import ParseResult, parse_exchange, render_text
+from exchange_parser import ALLOWED_EXTENSIONS, ParseResult, parse_exchange, render_text
 from exchange_specs import load_specs
 from models import FormatSpec
 from result_view import (
@@ -108,6 +116,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self._build_layout(choose_button))
         choose_button.setFocus()
 
+        # Files are dropped on the window itself, not into the child widgets.
+        self.setAcceptDrops(True)
+        for widget in (self._output, self._output.viewport(), self._file_field):
+            widget.setAcceptDrops(False)
+
     def _build_layout(self, choose_button: QPushButton) -> QWidget:
         header = QVBoxLayout()
         header.setSpacing(4)
@@ -139,6 +152,7 @@ class MainWindow(QMainWindow):
         result_header.addWidget(self._copy_button)
 
         results = _card()
+        self._results_card = results
         results_layout = QVBoxLayout(results)
         results_layout.setContentsMargins(1, 1, 1, 1)
         results_layout.setSpacing(0)
@@ -187,6 +201,38 @@ class MainWindow(QMainWindow):
         )
         if file_name:
             self.open_file(Path(file_name))
+
+    @staticmethod
+    def _dropped_file(event: QDragEnterEvent | QDropEvent) -> Path | None:
+        urls = event.mimeData().urls()
+        if len(urls) != 1 or not urls[0].isLocalFile():
+            return None
+        path = Path(urls[0].toLocalFile())
+        return path if path.suffix.lower() in ALLOWED_EXTENSIONS else None
+
+    def _set_drop_highlight(self, active: bool) -> None:
+        self._results_card.setProperty("dropTarget", active)
+        self._results_card.style().unpolish(self._results_card)
+        self._results_card.style().polish(self._results_card)
+
+    def dragEnterEvent(self, event: QDragEnterEvent) -> None:
+        if self._dropped_file(event) is None:
+            event.ignore()
+            return
+        event.acceptProposedAction()
+        self._set_drop_highlight(True)
+
+    def dragLeaveEvent(self, event: QDragLeaveEvent) -> None:
+        self._set_drop_highlight(False)
+
+    def dropEvent(self, event: QDropEvent) -> None:
+        self._set_drop_highlight(False)
+        path = self._dropped_file(event)
+        if path is None:
+            event.ignore()
+            return
+        event.acceptProposedAction()
+        self.open_file(path)
 
     def open_file(self, path: Path) -> None:
         """Remember the file and decode it right away."""
