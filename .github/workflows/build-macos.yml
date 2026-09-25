@@ -11,6 +11,7 @@ on:
       - "specs/**"
       - "assets/**"
       - "requirements.txt"
+      - "VERSION"
       - "build_macos.sh"
       - "build_dmg.sh"
       - "build_portable_macos.sh"
@@ -50,6 +51,10 @@ jobs:
         run: |
           BINARY="dist/${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
           lipo -archs "$BINARY"
+          PLIST_VERSION="$(plutil -extract CFBundleShortVersionString raw "dist/${APP_NAME}.app/Contents/Info.plist")"
+          echo "Версия в Info.plist: $PLIST_VERSION"
+          test "$PLIST_VERSION" = "$(cat VERSION)"
+          codesign --verify --deep --strict "dist/${APP_NAME}.app"
           ls "dist/${APP_NAME}.app/Contents/Resources/assets"
           # The app must start and keep running without crashing.
           QT_QPA_PLATFORM=offscreen "$BINARY" &

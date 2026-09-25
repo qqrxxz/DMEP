@@ -29,7 +29,16 @@ fi
   --add-data "config:config" \
   --add-data "specs:specs" \
   --add-data "assets:assets" \
+  --add-data "VERSION:." \
   main.py
 
+APP_VERSION="$(.venv/bin/python version.py)"
+APP_PATH="dist/${APP_NAME}.app"
+PLIST="${APP_PATH}/Contents/Info.plist"
+plutil -replace CFBundleShortVersionString -string "$APP_VERSION" "$PLIST"
+plutil -replace CFBundleVersion -string "$APP_VERSION" "$PLIST"
+# Info.plist changed after PyInstaller signed the bundle: sign it again (ad-hoc).
+codesign --force --sign - "$APP_PATH"
+
 echo
-echo "Готово: dist/${APP_NAME}.app"
+echo "Готово: ${APP_PATH} (версия ${APP_VERSION})"

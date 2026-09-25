@@ -39,6 +39,7 @@ from result_view import (
     summary_text,
 )
 from theme import current_theme, monospace_family, output_font
+from version import APP_VERSION
 
 
 def _label(text: str, object_name: str) -> QLabel:
@@ -126,7 +127,10 @@ class MainWindow(QMainWindow):
         header.setSpacing(4)
         header.addWidget(_label("DataMobile Exchange Parser", "title"))
         header.addWidget(
-            _label("Расшифровка файлов обмена DataMobile .dm и .dmU", "subtitle")
+            _label(
+                f"Расшифровка файлов обмена DataMobile .dm и .dmU · версия {APP_VERSION}",
+                "subtitle",
+            )
         )
 
         controls = _card()

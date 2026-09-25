@@ -38,7 +38,11 @@ if errorlevel 1 goto :error
 "%VENV_PYTHON%" -m pip install --no-compile -r requirements.txt
 if errorlevel 1 goto :error
 
-echo Сборка приложения...
+for /f "usebackq delims=" %%V in (`"%VENV_PYTHON%" version.py`) do set "APP_VERSION=%%V"
+"%VENV_PYTHON%" version.py "build\version_info.txt"
+if errorlevel 1 goto :error
+
+echo Сборка приложения версии %APP_VERSION%...
 "%VENV_PYTHON%" -m PyInstaller ^
     --noconfirm ^
     --clean ^
@@ -47,6 +51,8 @@ echo Сборка приложения...
     --add-data "config;config" ^
     --add-data "specs;specs" ^
     --add-data "assets;assets" ^
+    --add-data "VERSION;." ^
+    --version-file "build\version_info.txt" ^
     main.py
 if errorlevel 1 goto :error
 

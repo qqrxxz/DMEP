@@ -89,5 +89,14 @@ class ParserTests(unittest.TestCase):
         self.assertIn("Файл пустой или содержит только пустые строки.", result)
 
 
+class VersionTests(unittest.TestCase):
+    def test_version_is_numeric(self) -> None:
+        from version import APP_VERSION, version_tuple, windows_version_info
+
+        self.assertRegex(APP_VERSION, r"^\d+\.\d+\.\d+$")
+        self.assertEqual(4, len(version_tuple()))
+        self.assertIn(f"'ProductVersion', '{APP_VERSION}'", windows_version_info())
+
+
 if __name__ == "__main__":
     unittest.main()

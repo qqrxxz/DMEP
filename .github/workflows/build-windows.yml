@@ -11,6 +11,7 @@ on:
       - "specs/**"
       - "assets/**"
       - "requirements.txt"
+      - "VERSION"
       - "build_windows.bat"
       - "build_installer_windows.bat"
       - "build_portable_windows.bat"
@@ -58,6 +59,10 @@ jobs:
         run: |
           $exe = "dist\$env:APP_NAME\$env:APP_NAME.exe"
           Get-ChildItem "dist\$env:APP_NAME\_internal\assets"
+          $expected = (Get-Content VERSION -Raw).Trim()
+          $fileVersion = (Get-Item $exe).VersionInfo.ProductVersion
+          Write-Host "Версия exe: $fileVersion"
+          if ($fileVersion -ne $expected) { throw "Версия exe $fileVersion, ожидалась $expected" }
           # The app must start and keep running without crashing.
           $env:QT_QPA_PLATFORM = "offscreen"
           $process = Start-Process -FilePath $exe -PassThru
@@ -73,6 +78,14 @@ jobs:
           call build_portable_windows.bat < NUL
           if errorlevel 1 exit /b 1
           dir releases
+
+      - name: Проверка версии установщика
+        shell: pwsh
+        run: |
+          $expected = (Get-Content VERSION -Raw).Trim()
+          $setupVersion = (Get-Item releases\DataMobileExchangeParserSetup.exe).VersionInfo.ProductVersion
+          Write-Host "Версия установщика: $setupVersion"
+          if (-not $setupVersion.StartsWith($expected)) { throw "Версия установщика $setupVersion, ожидалась $expected" }
 
       - uses: actions/upload-artifact@v4
         with:

@@ -1,5 +1,8 @@
 #define AppName "DataMobile Exchange Parser"
-#define AppVersion "1.1.0"
+; The version comes from the VERSION file in the project root.
+#define VersionFile FileOpen(AddBackslash(SourcePath) + "..\VERSION")
+#define AppVersion Trim(FileRead(VersionFile))
+#expr FileClose(VersionFile)
 #define AppPublisher "DataMobile"
 #define AppExeName "DataMobile Exchange Parser.exe"
 
@@ -7,6 +10,7 @@
 AppId={{A95C29FA-F106-48E5-B8E9-E7CA93F5DA18}
 AppName={#AppName}
 AppVersion={#AppVersion}
+VersionInfoVersion={#AppVersion}
 AppPublisher={#AppPublisher}
 DefaultDirName={localappdata}\Programs\{#AppName}
 DefaultGroupName={#AppName}
