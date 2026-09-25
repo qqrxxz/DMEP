@@ -1,0 +1,74 @@
+name: Сборка macOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+    paths:
+      - "**.py"
+      - "config/**"
+      - "specs/**"
+      - "assets/**"
+      - "requirements.txt"
+      - "build_macos.sh"
+      - "build_dmg.sh"
+      - "build_portable_macos.sh"
+      - ".github/workflows/build-macos.yml"
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 40
+    env:
+      APP_NAME: DataMobile Exchange Parser
+      # Universal2 Python from python.org: needed for an Apple Silicon + Intel build.
+      PYTHON_VERSION: 3.12.10
+      PYTHON_BIN: /Library/Frameworks/Python.framework/Versions/3.12/bin/python3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Установка Python ${{ env.PYTHON_VERSION }} (universal2)
+        run: |
+          curl -fsSLo python.pkg "https://www.python.org/ftp/python/${PYTHON_VERSION}/python-${PYTHON_VERSION}-macos11.pkg"
+          sudo installer -pkg python.pkg -target /
+          rm python.pkg
+          "$PYTHON_BIN" -c "import platform, sys; print(sys.version, platform.machine())"
+
+      - name: Сборка приложения
+        run: |
+          chmod +x build_macos.sh build_dmg.sh build_portable_macos.sh
+          ./build_macos.sh
+
+      - name: Тесты
+        run: |
+          .venv/bin/python -m pip install --no-compile "pytest>=8.0,<9.0"
+          QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -q tests
+
+      - name: Проверка сборки
+        run: |
+          BINARY="dist/${APP_NAME}.app/Contents/MacOS/${APP_NAME}"
+          lipo -archs "$BINARY"
+          ls "dist/${APP_NAME}.app/Contents/Resources/assets"
+          # The app must start and keep running without crashing.
+          QT_QPA_PLATFORM=offscreen "$BINARY" &
+          PID=$!
+          sleep 15
+          kill -0 "$PID"
+          kill "$PID"
+
+      - name: DMG и portable ZIP
+        run: |
+          ./build_dmg.sh
+          ./build_portable_macos.sh
+          ls -lh releases
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DataMobileExchangeParser_macOS
+          path: |
+            releases/DataMobileExchangeParser_macOS.dmg
+            releases/DataMobileExchangeParser_Portable_macOS.zip
+          retention-days: 14
+          if-no-files-found: error
