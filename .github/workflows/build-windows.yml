@@ -79,6 +79,6 @@ jobs:
           name: DataMobileExchangeParser_Windows_x64
           path: |
             releases/DataMobileExchangeParserSetup.exe
-            releases/DataMobileExchangeParser_Portable_Windows.zip
+            releases/DataMobileExchangeParser_Portable_Windows_x64.zip
           retention-days: 14
           if-no-files-found: error

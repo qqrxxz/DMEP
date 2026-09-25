@@ -227,7 +227,7 @@ build_portable_windows.bat
 Результат:
 
 ```text
-releases\DataMobileExchangeParser_Portable_Windows.zip
+releases\DataMobileExchangeParser_Portable_Windows_x64.zip
 ```
 
 ### Упаковка в установщик

@@ -8,7 +8,7 @@ cd /d "%~dp0"
 set "APP_DIR=%CD%\dist\DataMobile Exchange Parser"
 set "APP_EXE=%APP_DIR%\DataMobile Exchange Parser.exe"
 set "RELEASE_DIR=%CD%\releases"
-set "ZIP_PATH=%RELEASE_DIR%\DataMobileExchangeParser_Portable_Windows.zip"
+set "ZIP_PATH=%RELEASE_DIR%\DataMobileExchangeParser_Portable_Windows_x64.zip"
 
 if not exist "%APP_EXE%" (
     echo ОШИБКА: готовое приложение не найдено.
