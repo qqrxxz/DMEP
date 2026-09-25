@@ -46,6 +46,7 @@ echo Сборка приложения...
     --name "DataMobile Exchange Parser" ^
     --add-data "config;config" ^
     --add-data "specs;specs" ^
+    --add-data "assets;assets" ^
     main.py
 if errorlevel 1 goto :error
 

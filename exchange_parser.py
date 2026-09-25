@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from dataclasses import dataclass, field
+from typing import List, Optional, Tuple
 
 from decoders import decode_value
 from models import FormatSpec, LineSpec
@@ -10,6 +11,46 @@ from models import FormatSpec, LineSpec
 
 ALLOWED_EXTENSIONS = {".dm", ".dmu"}
 MISSING = "значение не передано"
+
+
+@dataclass(frozen=True)
+class FieldValue:
+    name: str
+    value: str
+    decoded: Optional[str] = None
+
+    @property
+    def missing(self) -> bool:
+        return self.value.strip() == ""
+
+    def as_text(self) -> str:
+        if self.missing:
+            return f"{self.name}: {MISSING}"
+        value = self.value.strip()
+        shown = f"{value} — {self.decoded}" if self.decoded else value
+        return f"{self.name}: {shown}"
+
+
+@dataclass
+class Section:
+    title: str
+    fields: List[FieldValue] = field(default_factory=list)
+    raw_lines: List[str] = field(default_factory=list)
+    note: Optional[str] = None
+
+
+@dataclass
+class ParseResult:
+    format_name: str
+    file_name: str
+    encoding: str
+    line_count: int
+    skipped_empty: int = 0
+    sections: List[Section] = field(default_factory=list)
+
+    @property
+    def is_empty(self) -> bool:
+        return self.line_count == 0
 
 
 def read_data_file(path: Path) -> Tuple[str, str]:
@@ -48,22 +89,29 @@ def format_value(field_name: str, value: str | None) -> str:
     return f"{value} — {decoded}" if decoded else value
 
 
-def parse_fields(fields: List[str], values: List[str]) -> List[str]:
+def parse_field_values(fields: List[str], values: List[str]) -> List[FieldValue]:
     values = normalize_values(values, len(fields))
-    result: List[str] = []
+    result: List[FieldValue] = []
 
     for index, field_name in enumerate(fields):
         value = values[index] if index < len(values) else ""
-        result.append(f"{field_name}: {format_value(field_name, value)}")
+        result.append(FieldValue(field_name, value, decode_value(field_name, value)))
 
     if len(values) > len(fields):
         for index, value in enumerate(values[len(fields) :], start=1):
             result.append(
-                f"Дополнительное значение {index}: "
-                f"{format_value('Дополнительное значение', value)}"
+                FieldValue(
+                    f"Дополнительное значение {index}",
+                    value,
+                    decode_value("Дополнительное значение", value),
+                )
             )
 
     return result
+
+
+def parse_fields(fields: List[str], values: List[str]) -> List[str]:
+    return [field.as_text() for field in parse_field_values(fields, values)]
 
 
 def chunk_flat_values(values: List[str], fields_count: int) -> List[List[str]]:
@@ -101,35 +149,30 @@ def non_empty_lines(text: str) -> Tuple[List[str], int]:
     return lines, skipped
 
 
-def parse_exchange_file(path: Path, spec: FormatSpec) -> str:
+def parse_exchange(path: Path, spec: FormatSpec) -> ParseResult:
     path = Path(path)
     if path.suffix.lower() not in ALLOWED_EXTENSIONS:
         raise ValueError("Можно выбрать только файл .dm или .dmU/.dmu")
 
     text, encoding = read_data_file(path)
     lines, skipped_empty = non_empty_lines(text)
-
-    output = [
-        "DataMobile Exchange Parser",
-        f"Формат обмена: {spec.display_name}",
-        f"Файл: {path.name}",
-        f"Кодировка: {encoding}",
-        f"Непустых строк в файле: {len(lines)}",
-    ]
-    if skipped_empty:
-        output.append(f"Пустых строк пропущено: {skipped_empty}")
-    output.append("=" * 80)
-
+    result = ParseResult(
+        format_name=spec.display_name,
+        file_name=path.name,
+        encoding=encoding,
+        line_count=len(lines),
+        skipped_empty=skipped_empty,
+    )
     if not lines:
-        output.append("Файл пустой или содержит только пустые строки.")
-        return "\n".join(output)
+        return result
 
+    sections = result.sections
     line_index = 0
     for line_spec in spec.line_specs:
         if line_spec.repeat:
             remaining = lines[line_index:]
             if not remaining:
-                output.extend(("", f"{line_spec.title}: строки не переданы"))
+                sections.append(Section(line_spec.title, note="строки не переданы"))
                 continue
 
             if len(spec.line_specs) == 1 and len(remaining) == 1:
@@ -140,27 +183,61 @@ def parse_exchange_file(path: Path, spec: FormatSpec) -> str:
 
             for row_number, values in enumerate(rows, start=1):
                 fields = choose_fields(line_spec, values)
-                output.extend(
-                    (
-                        "",
+                sections.append(
+                    Section(
                         f"{line_spec.title} {row_number}",
-                        "-" * 80,
-                        *parse_fields(fields, values),
+                        parse_field_values(fields, values),
                     )
                 )
             line_index = len(lines)
             continue
 
-        output.extend(("", line_spec.title, "-" * 80))
         if line_index < len(lines):
-            output.extend(parse_fields(line_spec.fields, split_line(lines[line_index])))
+            values = split_line(lines[line_index])
             line_index += 1
         else:
-            output.extend(parse_fields(line_spec.fields, []))
+            values = []
+        sections.append(
+            Section(line_spec.title, parse_field_values(line_spec.fields, values))
+        )
 
     if line_index < len(lines):
-        output.extend(("", "Необработанные строки", "-" * 80))
-        for index, row in enumerate(lines[line_index:], start=1):
-            output.append(f"Строка {index}: {row}")
+        sections.append(
+            Section("Необработанные строки", raw_lines=lines[line_index:])
+        )
+
+    return result
+
+
+def render_text(result: ParseResult) -> str:
+    output = [
+        "DataMobile Exchange Parser",
+        f"Формат обмена: {result.format_name}",
+        f"Файл: {result.file_name}",
+        f"Кодировка: {result.encoding}",
+        f"Непустых строк в файле: {result.line_count}",
+    ]
+    if result.skipped_empty:
+        output.append(f"Пустых строк пропущено: {result.skipped_empty}")
+    output.append("=" * 80)
+
+    if result.is_empty:
+        output.append("Файл пустой или содержит только пустые строки.")
+        return "\n".join(output)
+
+    for section in result.sections:
+        if section.note:
+            output.extend(("", f"{section.title}: {section.note}"))
+            continue
+        output.extend(("", section.title, "-" * 80))
+        output.extend(field.as_text() for field in section.fields)
+        output.extend(
+            f"Строка {index}: {row}"
+            for index, row in enumerate(section.raw_lines, start=1)
+        )
 
     return "\n".join(output)
+
+
+def parse_exchange_file(path: Path, spec: FormatSpec) -> str:
+    return render_text(parse_exchange(path, spec))

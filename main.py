@@ -5,12 +5,14 @@ import sys
 from PySide6.QtWidgets import QApplication
 
 from app_window import MainWindow
+from theme import apply_theme, current_theme
 
 
 def main() -> int:
     app = QApplication(sys.argv)
     app.setApplicationName("DataMobile Exchange Parser")
     app.setOrganizationName("DataMobile")
+    apply_theme(app, current_theme())
     window = MainWindow()
     window.show()
     return app.exec()

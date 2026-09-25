@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from exchange_parser import MISSING, format_value, parse_exchange_file
+from exchange_parser import MISSING, format_value, parse_exchange, parse_exchange_file
 from exchange_specs import load_specs
 
 
@@ -65,6 +65,28 @@ class ParserTests(unittest.TestCase):
         self.assertEqual("+ — добавить / обновить", format_value("Операция", "+"))
         self.assertEqual("1 — да / использовать", format_value("ИспользоватьПодбор", "1"))
         self.assertEqual(MISSING, format_value("Поле", ""))
+
+    def test_structured_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "example.dm"
+            path.write_text("1\n+\n1;+;Основной склад\n\n2;-", encoding="utf-8")
+            result = parse_exchange(path, spec_by_name("Склады"))
+
+        self.assertEqual(4, result.line_count)
+        self.assertEqual(1, result.skipped_empty)
+        titles = [section.title for section in result.sections]
+        self.assertEqual("Строка объекта 1", titles[2])
+        self.assertEqual("Строка объекта 2", titles[3])
+
+        first_row = {field.name: field for field in result.sections[2].fields}
+        self.assertEqual("добавить / обновить", first_row["Операция"].decoded)
+        self.assertFalse(first_row["Идентификатор"].missing)
+        second_row = {field.name: field for field in result.sections[3].fields}
+        self.assertTrue(second_row["Наименование"].missing)
+
+    def test_empty_file(self) -> None:
+        result = self.parse_text("\n\n", "Склады")
+        self.assertIn("Файл пустой или содержит только пустые строки.", result)
 
 
 if __name__ == "__main__":

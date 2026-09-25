@@ -28,6 +28,7 @@ fi
   --name "$APP_NAME" \
   --add-data "config:config" \
   --add-data "specs:specs" \
+  --add-data "assets:assets" \
   main.py
 
 echo
